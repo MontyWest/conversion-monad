@@ -1,0 +1,11 @@
+.idea/
+.bloop/
+target/
+*.log
+native/
+.metals/
+.ammonite/
+metals.sbt
+.vscode/
+.bsp/
+.sbtopts
