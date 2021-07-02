@@ -7,6 +7,8 @@ package object conversion {
 
 	def eventToModel(
     event: Event
-  ): Model = ???
+  ): ??[List[Discrepancy], Model] = ???
+
+  
 
 }
