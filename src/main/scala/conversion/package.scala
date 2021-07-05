@@ -7,8 +7,21 @@ package object conversion {
 
 	def eventToModel(
     event: Event
-  ): ??[List[Discrepancy], Model] = ???
+  ): ??[List[Discrepancy], Model] = {
 
-  
+		def filterMissingCustomerId(
+			ownership: List[MeterOwner]
+		): ??[List[Discrepancy], List[MeterOwnerModel]]
+
+		def removeDuplicateFroms(
+			ownership: List[MeterOwnerModel]
+		): ??[List[Discrepancy], List[MeterOwnerModel]]
+
+		def validateNonEmpty(
+			ownership: List[MeterOwnerModel]
+		): Option[Discrepancy]
+
+		???
+  }
 
 }
