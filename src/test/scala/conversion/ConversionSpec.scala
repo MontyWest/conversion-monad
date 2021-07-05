@@ -101,7 +101,7 @@ class ConversionSpec
     }
   }
 
-  it should "add discrepancy and filter duplicated from dates, favouring the shorter ownership time" in {
+  it should "add discrepancy and filter duplicated from dates" in {
     val inputEvent = Event(
       meterId = testMeterId,
       ownership = List(

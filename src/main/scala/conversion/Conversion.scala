@@ -18,7 +18,7 @@ object Conversion {
   	Conversion(Nil, x)
 
   implicit def monadConversion[D]: Monad[Conversion[D, *]] =
-   new Monad[Conversion[D, *]] {
+    new Monad[Conversion[D, *]] {
 	  	override def pure[A](x: A): Conversion[D, A] =
 	  		Conversion.value(x)
 
