@@ -19,7 +19,7 @@ package object conversion {
 
 		def validateNonEmpty(
 			ownership: List[MeterOwnerModel]
-		): Option[Discrepancy]
+		): ??[List[Discrepancy], Unit]
 
 		???
   }
