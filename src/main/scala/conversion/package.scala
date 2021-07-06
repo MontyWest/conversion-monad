@@ -1,3 +1,4 @@
+import cats.data.Writer
 import model._
 import kafka._
 import cats.implicits._
@@ -12,14 +13,14 @@ package object conversion {
 
 		def filterMissingCustomerId(
 			ownership: List[MeterOwner]
-		): Conversion[Discrepancy, List[MeterOwnerModel]] = 
+		): Writer[List[Discrepancy], List[MeterOwnerModel]] =
 			ownership.traverse { 
 				case MeterOwner(Some(customerId), from, to) =>
-					Conversion.value[Discrepancy, Option[MeterOwnerModel]](
+					Writer.value[List[Discrepancy], Option[MeterOwnerModel]](
 						Option(MeterOwnerModel(customerId, from, to))
 					)
 				case MeterOwner(None, from, _) =>
-					Conversion.apply[Discrepancy, Option[MeterOwnerModel]](
+					Writer.apply[List[Discrepancy], Option[MeterOwnerModel]](
 						List(OwnershipRemovedMissingCustomerId(from)),
 						Option.empty[MeterOwnerModel]
 					) 
@@ -27,28 +28,28 @@ package object conversion {
 
 		def removeDuplicateFroms(
 			ownership: List[MeterOwnerModel]
-		): Conversion[Discrepancy, List[MeterOwnerModel]] =
+		): Writer[List[Discrepancy], List[MeterOwnerModel]] =
 			ownership
         .groupBy(_.from)
         .toList
         .traverse {
           case (_, hd +: tl) if tl.nonEmpty => 
-            Conversion[Discrepancy, MeterOwnerModel](
+            Writer.apply[List[Discrepancy], MeterOwnerModel](
             	List(OwnershipsRemovedDuplicatedFrom(tl)),
             	hd
             )
           case (_, ls) =>
-            Conversion.value[Discrepancy, MeterOwnerModel](ls.head)
+						Writer.value[List[Discrepancy], MeterOwnerModel](ls.head)
         }
 
 		def validateNonEmpty(
 			ownership: List[MeterOwnerModel]
-		): Conversion[Discrepancy, Unit] = 
-			Conversion.tell[Discrepancy](
+		): Writer[List[Discrepancy], Unit] =
+			Writer.tell[List[Discrepancy]](
 				List(MissingOwnershipHistory)
 			).whenA(ownership.isEmpty)
 
-		for {
+		val writer = for {
 			converted <- filterMissingCustomerId(event.ownership)
 			filtered  <- removeDuplicateFroms(converted)
 			_         <- validateNonEmpty(filtered)
@@ -56,6 +57,10 @@ package object conversion {
 			event.meterId,
 			filtered
 		)
+
+		writer.run match {
+			case (discrepancies, model) => Conversion(discrepancies, model)
+		}
   }
 
 }
